@@ -1,13 +1,14 @@
-from pydantic_settings import BaseSettings
+from pydantic_settings import BaseSettings as PydanticBaseSettings
 
-
-class Settings(BaseSettings):
-    APP_NAME: str = "Crowdfunding API"
+# For Pydantic V2 (recommended)
+class Settings(PydanticBaseSettings):
+    APP_NAME: str = "Bedebo API"
     API_V1_PREFIX: str = "/api/v1"
     DEBUG: bool = False
+    DATABASE_URL: str = "sqlite+aiosqlite:///./bedebo.db"
 
-    class Config:
-        env_file = ".env"
-
-
+    model_config = {
+        "env_file": ".env",
+        "env_file_encoding": "utf-8",
+    }
 settings = Settings()

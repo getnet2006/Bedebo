@@ -18,6 +18,7 @@ from app.services.campaign import update_existing_campaign
 from app.repositories.campaign import update_campaign
 from app.api.deps import get_current_user_optional
 from app.models.campaign import CampaignStatus
+from app.services.campaign import activate_campaign
 from typing import Optional
 
 
@@ -94,6 +95,30 @@ async def update_campaign_endpoint(
             campaign=campaign,
             owner=current_user,
             updates=campaign_in,
+        )
+    except PermissionError as e:
+        raise HTTPException(status_code=403, detail=str(e))
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+@router.post(
+    "/{campaign_id}/activate",
+    response_model=CampaignRead,
+)
+async def activate_campaign_endpoint(
+    campaign_id: int,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    campaign = await get_campaign_by_id(db, campaign_id)
+    if not campaign:
+        raise HTTPException(status_code=404, detail="Campaign not found")
+
+    try:
+        return await activate_campaign(
+            db=db,
+            campaign=campaign,
+            owner=current_user,
         )
     except PermissionError as e:
         raise HTTPException(status_code=403, detail=str(e))

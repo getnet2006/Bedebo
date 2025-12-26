@@ -28,7 +28,7 @@ class Campaign(Base):
     deadline: Mapped[datetime] = mapped_column(DateTime(timezone=True))
 
     status: Mapped[CampaignStatus] = mapped_column(
-        Enum(CampaignStatus),
+        Enum(CampaignStatus, native_enum=False),
         default=CampaignStatus.DRAFT,
     )
 

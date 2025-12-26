@@ -2,25 +2,19 @@ from fastapi import FastAPI
 
 from app.core.config import settings
 from app.api.v1.router import api_router
-from app.db.session import engine
-from app.db.base import Base
 from fastapi.exceptions import RequestValidationError
 from app.core.exceptions import validation_exception_handler, api_exception_handler, unhandled_exception_handler, APIException    
+from app.core.scheduler import start_scheduler
 
-# This line is mandatory for table creation
-import app.models  # noqa
 
 app = FastAPI(
     title=settings.APP_NAME,
     debug=settings.DEBUG
 )
 
-
 @app.on_event("startup")
-async def on_startup():
-    async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.create_all)
-
+async def startup_event():
+    start_scheduler()
 
 app.include_router(
     api_router,

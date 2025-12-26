@@ -4,15 +4,17 @@ from app.core.exceptions import APIException
 from app.core.error_codes import ErrorCode
 from app.models.contribution import Contribution
 from app.models.campaign import Campaign, CampaignStatus
+from app.repositories.campaign import get_campaign_for_update
 from app.models.user import User
 import decimal
 
 async def contribute_to_campaign(
     db: AsyncSession,
-    campaign: Campaign,
+    campaign_id: int,
     contributor: User,
     amount: float,
 ) -> Contribution:
+    campaign = await get_campaign_for_update(db, campaign_id)
     if campaign.status != CampaignStatus.ACTIVE:
         raise APIException(
             status_code=400,

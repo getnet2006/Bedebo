@@ -8,7 +8,7 @@ from app.schemas.contribution import (
     ContributionCreate,
     ContributionRead,
 )
-from app.repositories.campaign import get_campaign_by_id
+from app.repositories.campaign import get_campaign_for_update
 from app.services.contribution import contribute_to_campaign
 from app.repositories.contribution import list_user_contributions
 
@@ -26,19 +26,10 @@ async def contribute(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    campaign = await get_campaign_by_id(db, campaign_id)
-    if not campaign:
-        # raise HTTPException(status_code=404, detail="Campaign not found")
-        raise APIException(
-            status_code=404,
-            error_code=ErrorCode.CAMPAIGN_NOT_FOUND,
-            message="Campaign not found",
-        )
-
     try:
         return await contribute_to_campaign(
             db=db,
-            campaign=campaign,
+            campaign_id=campaign_id,
             contributor=current_user,
             amount=contribution_in.amount,
         )

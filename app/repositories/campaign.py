@@ -1,6 +1,6 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
-
+from sqlalchemy.orm import selectinload
 from app.models.campaign import Campaign
 
 
@@ -40,3 +40,10 @@ async def update_campaign(
     await db.refresh(campaign)
     return campaign
 
+async def get_campaign_for_update(db, campaign_id: int):
+    result = await db.execute(
+        select(Campaign)
+        .where(Campaign.id == campaign_id)
+        .with_for_update()
+    )
+    return result.scalar_one_or_none()

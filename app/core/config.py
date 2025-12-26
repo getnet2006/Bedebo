@@ -9,6 +9,11 @@ class Settings(PydanticBaseSettings):
     SECRET_KEY: str = "CHANGE_ME"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60
     ALGORITHM: str = "HS256"
+    DATABASE_URL: str = (
+        "postgresql+asyncpg://work:"
+        "password@localhost:5432/bedebo"
+    )
+    TEST_DATABASE_URL: str = "sqlite+aiosqlite:///./test.db"
 
     model_config = {
         "env_file": ".env",

@@ -1,8 +1,15 @@
-from sqlalchemy import String, Text, DateTime, ForeignKey, Numeric
+from sqlalchemy import String, Text, DateTime, ForeignKey, Numeric, Enum
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from datetime import datetime
+import enum
 
 from app.db.base import Base
+
+
+class CampaignStatus(str, enum.Enum):
+    DRAFT = "DRAFT"
+    ACTIVE = "ACTIVE"
+    CLOSED = "CLOSED"
 
 
 class Campaign(Base):
@@ -19,7 +26,11 @@ class Campaign(Base):
     )
 
     deadline: Mapped[datetime] = mapped_column(DateTime(timezone=True))
-    is_active: Mapped[bool] = mapped_column(default=True)
+
+    status: Mapped[CampaignStatus] = mapped_column(
+        Enum(CampaignStatus),
+        default=CampaignStatus.DRAFT,
+    )
 
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),

@@ -1,6 +1,7 @@
 from datetime import datetime
 from sqlalchemy.ext.asyncio import AsyncSession
-
+from app.core.exceptions import APIException
+from app.core.error_codes import ErrorCode
 from app.models.contribution import Contribution
 from app.models.campaign import Campaign, CampaignStatus
 from app.models.user import User
@@ -12,13 +13,26 @@ async def contribute_to_campaign(
     contributor: User,
     amount: float,
 ) -> Contribution:
-    # 1. Campaign must be ACTIVE
     if campaign.status != CampaignStatus.ACTIVE:
-        raise ValueError("Campaign is not active")
+        raise APIException(
+            status_code=400,
+            error_code=ErrorCode.CAMPAIGN_NOT_ACTIVE,
+            message="Campaign is not active",
+        )
 
-    # 2. Deadline enforcement
     if campaign.deadline < datetime.utcnow():
-        raise ValueError("Campaign deadline has passed")
+        raise APIException(
+            status_code=400,
+            error_code=ErrorCode.CAMPAIGN_DEADLINE_PASSED,
+            message="Campaign deadline has passed",
+        )
+
+    if amount <= 0:
+        raise APIException(
+            status_code=400,
+            error_code=ErrorCode.INVALID_CONTRIBUTION_AMOUNT,
+            message="Contribution amount must be greater than zero",
+        )
 
     # 3. Create contribution
     contribution = Contribution(

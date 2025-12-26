@@ -9,6 +9,8 @@ from app.repositories.campaign import (
     update_campaign,
 )
 from app.schemas.campaign import CampaignUpdate
+from app.core.exceptions import APIException
+from app.core.error_codes import ErrorCode
 
 
 async def create_new_campaign(
@@ -20,7 +22,11 @@ async def create_new_campaign(
     deadline: datetime,
 ) -> Campaign:
     if deadline <= datetime.now(timezone.utc):
-        raise ValueError("Deadline must be in the future")
+        raise APIException(
+            status_code=400,
+            error_code=ErrorCode.CAMPAIGN_DEADLINE_MUST_BE_FUTURE,
+            message="Deadline must be in the future",
+        )
 
     campaign = Campaign(
         owner_id=owner.id,
@@ -39,10 +45,18 @@ async def activate_campaign(
     owner: User,
 ) -> Campaign:
     if campaign.owner_id != owner.id:
-        raise PermissionError("Not campaign owner")
+        raise APIException(
+            status_code=401,
+            error_code=ErrorCode.CAMPAIGN_NOT_OWNER,
+            message="Not campaign owner",
+        )
 
     if campaign.status != CampaignStatus.DRAFT:
-        raise ValueError("Only draft campaigns can be activated")
+        raise APIException(
+            status_code=400,
+            error_code=ErrorCode.CAMPAIGN_ALREADY_ACTIVE,
+            message="Only draft campaigns can be activated",
+        )
 
     campaign.status = CampaignStatus.ACTIVE
     await db.commit()
@@ -56,10 +70,18 @@ async def update_existing_campaign(
     updates: CampaignUpdate,
 ) -> Campaign:
     if campaign.owner_id != owner.id:
-        raise PermissionError("Not campaign owner")
+        raise APIException(
+            status_code=401,
+            error_code=ErrorCode.CAMPAIGN_NOT_OWNER,
+            message="Not campaign owner",
+        )
 
     if campaign.status != CampaignStatus.DRAFT:
-        raise ValueError("Only draft campaigns can be updated")
+        raise APIException(
+            status_code=400,
+            error_code=ErrorCode.CAMPAIGN_ALREADY_ACTIVE,
+            message="Only draft campaigns can be activated",
+        )
 
     update_data = updates.dict(exclude_unset=True)
 

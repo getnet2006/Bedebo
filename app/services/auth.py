@@ -7,6 +7,9 @@ from app.repositories.user import (
 from app.core.security import hash_password, verify_password
 from app.core.jwt import create_access_token
 from app.models.user import User
+from app.core.exceptions import APIException
+from app.core.error_codes import ErrorCode
+
 
 
 async def register_user(
@@ -14,7 +17,11 @@ async def register_user(
 ) -> User:
     existing = await get_user_by_email(db, email)
     if existing:
-        raise ValueError("User already exists")
+        raise APIException(
+            status_code=409,
+            error_code=ErrorCode.EMAIL_ALREADY_EXISTS,
+            message="User already exists",
+        )
 
     return await create_user(
         db,
@@ -28,6 +35,10 @@ async def authenticate_user(
 ) -> str:
     user = await get_user_by_email(db, email)
     if not user or not verify_password(password, user.hashed_password):
-        raise ValueError("Invalid credentials")
+        raise APIException(
+            status_code=401,
+            error_code=ErrorCode.INVALID_CREDENTIALS,
+            message="Invalid credentials",
+        )
 
     return create_access_token(subject=str(user.id))

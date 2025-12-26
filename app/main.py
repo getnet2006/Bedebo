@@ -4,8 +4,8 @@ from app.core.config import settings
 from app.api.v1.router import api_router
 from app.db.session import engine
 from app.db.base import Base
-from app.core.exceptions import validation_exception_handler
 from fastapi.exceptions import RequestValidationError
+from app.core.exceptions import validation_exception_handler, api_exception_handler, unhandled_exception_handler, APIException    
 
 # This line is mandatory for table creation
 import app.models  # noqa
@@ -27,7 +27,6 @@ app.include_router(
     prefix=settings.API_V1_PREFIX
 )
 
-app.add_exception_handler(
-    RequestValidationError,
-    validation_exception_handler,
-)
+app.add_exception_handler(APIException, api_exception_handler)
+app.add_exception_handler(RequestValidationError, validation_exception_handler)
+app.add_exception_handler(Exception, unhandled_exception_handler)

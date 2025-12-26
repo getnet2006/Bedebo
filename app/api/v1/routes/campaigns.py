@@ -20,6 +20,8 @@ from app.api.deps import get_current_user_optional
 from app.models.campaign import CampaignStatus
 from app.services.campaign import activate_campaign
 from typing import Optional
+from app.core.exceptions import APIException
+from app.core.error_codes import ErrorCode
 
 
 router = APIRouter(prefix="/campaigns", tags=["Campaigns"])
@@ -60,7 +62,12 @@ async def get_campaign(
 ):
     campaign = await get_campaign_by_id(db, campaign_id)
     if not campaign:
-        raise HTTPException(status_code=404, detail="Campaign not found")
+        # raise HTTPException(status_code=404, detail="Campaign not found")
+        raise APIException(
+            status_code=404,
+            error_code=ErrorCode.CAMPAIGN_NOT_FOUND,
+            message="Campaign not found",
+        )
 
     # PUBLIC: ACTIVE campaigns
     if campaign.status == CampaignStatus.ACTIVE:
@@ -87,7 +94,12 @@ async def update_campaign_endpoint(
 ):
     campaign = await get_campaign_by_id(db, campaign_id)
     if not campaign:
-        raise HTTPException(status_code=404, detail="Campaign not found")
+        # raise HTTPException(status_code=404, detail="Campaign not found")
+        raise APIException(
+            status_code=404,
+            error_code=ErrorCode.CAMPAIGN_NOT_FOUND,
+            message="Campaign not found",
+        )
 
     try:
         return await update_existing_campaign(
@@ -112,7 +124,12 @@ async def activate_campaign_endpoint(
 ):
     campaign = await get_campaign_by_id(db, campaign_id)
     if not campaign:
-        raise HTTPException(status_code=404, detail="Campaign not found")
+        # raise HTTPException(status_code=404, detail="Campaign not found")
+        raise APIException(
+            status_code=404,
+            error_code=ErrorCode.CAMPAIGN_NOT_FOUND,
+            message="Campaign not found",
+        )
 
     try:
         return await activate_campaign(

@@ -28,7 +28,12 @@ async def contribute(
 ):
     campaign = await get_campaign_by_id(db, campaign_id)
     if not campaign:
-        raise HTTPException(status_code=404, detail="Campaign not found")
+        # raise HTTPException(status_code=404, detail="Campaign not found")
+        raise APIException(
+            status_code=404,
+            error_code=ErrorCode.CAMPAIGN_NOT_FOUND,
+            message="Campaign not found",
+        )
 
     try:
         return await contribute_to_campaign(
